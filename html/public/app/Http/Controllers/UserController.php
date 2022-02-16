@@ -49,11 +49,10 @@ class UserController extends Controller
                 $user->email = $params->email;
                 $user->password = $pwd;
 
-                $userDB = User::all();
                 // Guardamos el usuario
-                // $user->save();
+                $user->save();
 
-                $data = $this->create_success('El usuario SI se ha creado', $code = 200, 'user', $userDB);
+                $data = $this->create_success('El usuario SI se ha creado', $code = 200, 'user', $user);
             }
         }
 
