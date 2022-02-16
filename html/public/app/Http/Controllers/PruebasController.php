@@ -11,26 +11,26 @@ class PruebasController extends Controller
 {
     public function testOrm(){
 
-        $posts = Post::all();
-        $categories = Category::all();
+        // $posts = Post::all();
+        // $categories = Category::all();
         // var_dump($posts);
-        foreach($posts as $post){
-            echo "<span>".$post->user->name."</span>";
-            echo $post->category->name."<br>";
-            // var_dump($post);
-            // var_dump($post);
-        }
+        // foreach($posts as $post){
+        //     echo "<span>".$post->user->name."</span>";
+        //     echo $post->category->name."<br>";
+        //     // var_dump($post);
+        //     // var_dump($post);
+        // }
 
-        foreach($categories as $category){
-            echo "<span>".$category->name."</span>";
-            foreach($category->posts as $post){
-                echo "<span>".$post->title."</span>";
-            }
+        // foreach($categories as $category){
+        //     echo "<span>".$category->name."</span>";
+        //     foreach($category->posts as $post){
+        //         echo "<span>".$post->title."</span>";
+        //     }
 
-        }
+        // }
+        phpinfo();
 
 
         die();
     }
 }
-// https://github.com/ionut-botizan/docker-nginx-php-xdebug
