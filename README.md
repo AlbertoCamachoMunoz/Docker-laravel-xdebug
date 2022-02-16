@@ -28,10 +28,19 @@ _Note_: On Windows [hot reload doesn't work with WSL 2](https://github.com/micro
 
 ## use container
 
-for windows
+For windows
 ```sh
 # first install composer in your pc and use in cmd -> composer update in the folder html/public for restaurate vendor utilities
-docker-compose up -d --build  and enter to localhost:8080/public
+
+-first:    key down Windows + R and open your terminal
+-second:   cd C:\MyFoldelRoot\apache-php-fpm-alpine\html\public
+-third:    composer install 
+-fourth:   composer update
+-fifth:    docker-compose up -d --build
+
+- In this point test the install
+use chrome navigator and enter to localhost:8080/public  for index laravel
+use chrome navigator and enter to localhost:8081 for phpMyAdmin  user: admin pass: changepassword  use MariaDb
 ```
 
 Starting the container with `docker-compose` offers all functionalities.
