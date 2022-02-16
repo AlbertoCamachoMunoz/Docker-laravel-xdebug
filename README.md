@@ -9,6 +9,7 @@ A super light docker web server with Apache and php-fpm on top of Alpine Linux f
 - composer 2.1.12
 - zsh 5.8
 - Alpine 3.15.0
+- phpMyAdmin
 
 The docker image size is 61 MB.
 
@@ -26,6 +27,10 @@ _Note_: for the web server plus MariaDB, check https://github.com/8ctopus/php-sa
 _Note_: On Windows [hot reload doesn't work with WSL 2](https://github.com/microsoft/WSL/issues/4739), you need to use the legacy Hyper-V.
 
 ## use container
+
+#for windows
+#install composer in your pc and use in cmd -> composer update in the folder html/public for restaurate vendor utilities
+#docker-compose up -d --build  and enter to localhost:8080/public
 
 Starting the container with `docker-compose` offers all functionalities.
 
