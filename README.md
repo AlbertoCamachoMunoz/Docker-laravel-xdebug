@@ -28,9 +28,11 @@ _Note_: On Windows [hot reload doesn't work with WSL 2](https://github.com/micro
 
 ## use container
 
-#for windows
-#install composer in your pc and use in cmd -> composer update in the folder html/public for restaurate vendor utilities
-#docker-compose up -d --build  and enter to localhost:8080/public
+for windows
+```sh
+# first install composer in your pc and use in cmd -> composer update in the folder html/public for restaurate vendor utilities
+docker-compose up -d --build  and enter to localhost:8080/public
+```
 
 Starting the container with `docker-compose` offers all functionalities.
 
