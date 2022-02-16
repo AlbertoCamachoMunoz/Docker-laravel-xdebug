@@ -1,0 +1,118 @@
+version: '3.7'
+
+
+#Docker Networks
+networks:
+  laravel:
+    driver: bridge
+
+#Volumes
+volumes:
+  dbdata:
+    driver: local
+
+
+services:
+  web:
+    # php 8.0.14
+    image: 8ct8pus/apache-php-fpm-alpine:1.2.3
+    # php 7.4.21
+    #image: 8ct8pus/apache-php-fpm-alpine:1.1.3
+    # development image
+    #image: apache-php-fpm-alpine:dev
+    container_name: web
+    ports:
+      - 8080:80
+      - 443:443
+    environment:
+      - DOMAIN=localhost
+      - DOCUMENT_ROOT=/public
+    volumes:
+      # development directory
+      - ./html/:/var/www/html/
+      # expose apache logs to host
+      - ./docker/log/:/var/log/apache2/
+      # expose apache2 and php config to host
+      - ./docker/etc/:/docker/etc/
+      # expose ssl certificates to host
+      - ./docker/ssl/:/etc/ssl/apache2/
+    depends_on:
+      - mariadb 
+    networks:
+      - laravel  
+
+  mariadb:
+      image: "mariadb:10.7.1"
+      restart: always
+      working_dir: /app
+      volumes:
+          - ".:/app"
+          - "./mariadb/data:/var/lib/mysql"
+          - "./mariadb/logs:/var/log/mysql"
+          - "./mariadb/conf:/etc/mysql"
+      environment:
+          MARIADB_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD}"
+          MARIADB_DATABASE: "${MARIADB_DATABASE}"
+          MARIADB_USER: "${MARIADB_USER}"
+          MARIADB_PASSWORD: "${MARIADB_PASSWORD}"
+      ports:
+        - "3306:3306" 
+      entrypoint: sh -c "
+        echo 'CREATE DATABASE IF NOT EXISTS identy;' > /docker-entrypoint-initdb.d/init.sql;
+        /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"     
+      networks:
+        - laravel   
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    depends_on:
+      - mariadb
+    ports:
+      - "8081:80"
+    volumes:
+      - /sessions
+    networks:
+      - laravel
+    links:
+      - mariadb  
+
+
+  composer:
+    build:
+      context: .
+      dockerfile: ./compose/php/composer/Dockerfile
+    container_name: composer
+    volumes:
+      - ./html/:/var/www/html/
+    working_dir: /var/www/html
+    depends_on:
+      - web
+    user: laravel
+    networks:
+      - laravel
+    entrypoint: [ 'composer', '--ignore-platform-reqs' ]
+
+
+  artisan:
+    build:
+      context: .
+      dockerfile: ./compose/php/Dockerfile
+    container_name: artisan
+    volumes:
+      - ./html/:/var/www/html/
+    depends_on:
+      - mariadb
+    working_dir: /var/www/html
+    user: laravel
+    entrypoint: [ 'php', '/var/www/html/artisan' ]
+    networks:
+      - laravel    
+
