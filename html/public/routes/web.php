@@ -5,6 +5,7 @@ use App\Http\Controllers\PruebasController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
+use App\Http\Middleware\ApiAuthMiddleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,5 +32,5 @@ Route::get('/', [PruebasController::class, 'testOrm']);
 // rutas para el entorno
 Route::post('/api/register', [UserController::class, 'register']);
 Route::post('/api/login', [UserController::class, 'login']);
-Route::put('/api/update', [UserController::class, 'update']);
-Route::post('/api/upload', [UserController::class, 'upload']);
+Route::put('/api/update', [UserController::class, 'update'])->middleware(ApiAuthMiddleware::class);
+Route::post('/api/upload',  [UserController::class, 'upload'])->middleware(ApiAuthMiddleware::class);

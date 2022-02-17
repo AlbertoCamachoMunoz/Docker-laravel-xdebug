@@ -102,65 +102,70 @@ class UserController extends Controller
 
     public function update(Request $request){
 
-        $json = $request->header('Authorization', null);
-        $jwtAuth = new \JwtAuth();
+        // recoger los datos del request
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
 
-        $userCheck = $jwtAuth->checkToken($json, true);
+        $userCheck = $request->userCheck;
+        
+        if( !empty($params) && !empty($params_array) ){
+            // limpiar datos
+            $params_array = array_map('trim', $params_array);
 
-        if($userCheck){
+            // validar datos y  obtenemos el usuario 
+            $validate = \Validator::make($params_array,[
+                'name'      =>  'required|alpha',
+                'surname'   =>  'required|alpha',
+                'email'     =>  'required|email|unique:users,'.$userCheck->sub
+            ]);
 
-            // recoger los datos del request
-            $json = $request->input('json', null);
-            $params = json_decode($json);
-            $params_array = json_decode($json, true);
+            // quitar campos que no me interesa actualizar
+            unset($params_array['id']);
+            unset($params_array['role']);
+            unset($params_array['password']);
+            unset($params_array['created_at']);
+            unset($params_array['remember_token']);
 
+            // Actualizar usuario
+            $user_result_update = User::where('id', $userCheck->sub)->update($params_array);
+            $user = User::find($userCheck->sub);
+
+            // alternativa que devuelve los datos
+            // $user = DB::table('users')->where('id', $userCheck->sub)->get();
+
+            $data = $this->create_success('El token SI es correcto', $code = 200, 'user', $user);
             
-            if( !empty($params) && !empty($params_array) ){
-                // limpiar datos
-                $params_array = array_map('trim', $params_array);
-
-                // validar datos y  obtenemos el usuario 
-                $validate = \Validator::make($params_array,[
-                    'name'      =>  'required|alpha',
-                    'surname'   =>  'required|alpha',
-                    'email'     =>  'required|email|unique:users,'.$userCheck->sub
-                ]);
-
-                // quitar campos que no me interesa actualizar
-                unset($params_array['id']);
-                unset($params_array['role']);
-                unset($params_array['password']);
-                unset($params_array['created_at']);
-                unset($params_array['remember_token']);
-
-                // Actualizar usuario
-                $user_result_update = User::where('id', $userCheck->sub)->update($params_array);
-                $user = User::find($userCheck->sub);
-
-                // alternativa que devuelve los datos
-                // $user = DB::table('users')->where('id', $userCheck->sub)->get();
-
-                $data = $this->create_success('El token SI es correcto', $code = 200, 'user', $user);
-            }
 
             if( empty($params) || empty($params_array) ) $data = $this->create_success('El token SI es correcto', $code = 200, 'checkToken', $userCheck);
 
         }  
-
-        if(!$userCheck) $data = $this->create_error('El token no es correcto', 'datos vacíos', 404);
+                // error en los datos
+        if(empty($params) || empty($params_array)) $data = $this->create_error('El token NO es correcto', 'datos vacíos', 404);
 
         return $data;
         die();
     }
 
     public function upload(Request $request){
-        $data = $this->create_success('Imagen subida correcto', $code = 200);
+        // recoger los datos
+        $image = $request->file('file0');
 
-        return response($data, $data['code'])->header('Content-Type', 'text/plain');
+        // subir los archivos
+        if($image){
+            $image_name = time().$image->getClientOriginalName();
+            \Storage::disk('users')->put( $image_name, \File::get($image) );
+            $data = $this->create_success('Imagen subida correcto', $code = 200, 'imagen', $image_name );
+        }
+
+
+        if(!$image) $data = $this->create_error('La imagen NO es correcta', 'datos vacíos', 404);
+
+        return response($data)->header('Content-Type', 'text/plain');
     }
 
 
-    public function create_error($msg, $error, $code = 404, $key=false, $value=false){
+    public function create_error($msg, $error, $code = 404, $key = null, $value=null){
         return array(
             'status'    =>  'error',
             'code'      =>  $code,
@@ -170,7 +175,7 @@ class UserController extends Controller
         );
     }
 
-    public function create_success($msg, $code = 200, $key, $value){
+    public function create_success($msg, $code = 200, $key = null, $value = null){
         return array(
             'status'    =>  'success',
             'code'      =>  $code,
