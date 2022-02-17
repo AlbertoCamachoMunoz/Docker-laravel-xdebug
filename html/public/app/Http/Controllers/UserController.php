@@ -150,16 +150,18 @@ class UserController extends Controller
     public function upload(Request $request){
         // recoger los datos
         $image = $request->file('file0');
-
+        // validar los datos
+        $validate = \Validator::make($request->all(),[
+            'file0'      =>  'required|image|mimes:jpg,jpeg,png,gif,pdf',
+        ]);
         // subir los archivos
-        if($image){
+        if( $image && !$validate->fails() ){
             $image_name = time().$image->getClientOriginalName();
             \Storage::disk('users')->put( $image_name, \File::get($image) );
             $data = $this->create_success('Imagen subida correcto', $code = 200, 'imagen', $image_name );
         }
 
-
-        if(!$image) $data = $this->create_error('La imagen NO es correcta', 'datos vacíos', 404);
+        if( !$image || $validate->fails() ) $data = $this->create_error('La imagen NO es correcta', 'datos vacíos', 404);
 
         return response($data)->header('Content-Type', 'text/plain');
     }
