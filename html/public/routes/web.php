@@ -30,7 +30,9 @@ Route::get('/', [PruebasController::class, 'testOrm']);
 // Route::get('/post', [PostController::class, 'pruebas']);
 
 // rutas para el entorno
-Route::post('/api/register', [UserController::class, 'register']);
-Route::post('/api/login', [UserController::class, 'login']);
-Route::put('/api/update', [UserController::class, 'update'])->middleware(ApiAuthMiddleware::class);
-Route::post('/api/upload',  [UserController::class, 'upload'])->middleware(ApiAuthMiddleware::class);
+Route::post('/api/register',                [UserController::class, 'register']);
+Route::post('/api/login',                   [UserController::class, 'login']);
+Route::put('/api/update',                   [UserController::class, 'update'])->middleware(ApiAuthMiddleware::class);
+Route::post('/api/upload',                  [UserController::class, 'upload'])->middleware(ApiAuthMiddleware::class);
+Route::get('/api/detail/{id}',             [UserController::class, 'detail']);
+Route::get('/api/user/avatar/{filename}',   [UserController::class, 'getImage']);

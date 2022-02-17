@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 
@@ -150,10 +151,12 @@ class UserController extends Controller
     public function upload(Request $request){
         // recoger los datos
         $image = $request->file('file0');
+
         // validar los datos
         $validate = \Validator::make($request->all(),[
             'file0'      =>  'required|image|mimes:jpg,jpeg,png,gif,pdf',
         ]);
+
         // subir los archivos
         if( $image && !$validate->fails() ){
             $image_name = time().$image->getClientOriginalName();
@@ -165,6 +168,44 @@ class UserController extends Controller
 
         return response($data)->header('Content-Type', 'text/plain');
     }
+
+    public function getImage($filename){
+        $data = $this->create_error('La imagen NO existe', 'imagen vacíos', 404, 'image');
+        try {
+            $isset = \Storage::disk('users')->exists( $filename );
+
+            if($isset){
+                $file = \Storage::disk('users')->get( $filename );
+                return new Response($file, 200);
+            } 
+            if(!$isset) return response()->json($data, $data['code']);
+
+        } catch (\Throwable $th) {
+            return response()->json($data, $data['code']);
+        }
+
+    }
+
+    public function detail($id){
+        $data = $this->create_error('Error al obtener el usuario', 'user not found', 404, 'user');
+
+        try {
+            
+            $user = User::find($id);
+
+            if( is_object($user) ) 
+                $data = $this->create_success('Resultado de user', $code = 200, 'user', $user );
+
+            return response()->json($data, $data['code']);
+
+
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json($data, $data['code']);
+        }
+
+    }
+
 
 
     public function create_error($msg, $error, $code = 404, $key = null, $value=null){
