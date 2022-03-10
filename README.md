@@ -78,8 +78,7 @@ docker stop container
 
 ## access website
 
-    http://localhost/
-    https://localhost/
+    http://127.0.0.1:8080/public/welcome
 
 The source code is located inside the `html` directory.
 
